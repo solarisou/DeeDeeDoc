@@ -1,0 +1,211 @@
+================================================================================
+TEST - CANDIDATURE TRANSFÉRÉE PAR EMAIL
+================================================================================
+
+À ENVOYER À : projetddsgroupe2@gmail.com
+
+--------------------------------------------------------------------------------
+OBJET :
+--------------------------------------------------------------------------------
+Transfert de candidature - Sarah Cherifi
+
+--------------------------------------------------------------------------------
+CORPS :
+--------------------------------------------------------------------------------
+
+Bonjour,
+
+Nous vous transférons une candidature qui pourrait correspondre à vos besoins.
+
+Candidat : Sarah Cherifi
+Email : cherifisarah232@gmail.com
+Téléphone : 0750541678
+Poste visé : Développement Web Full-Stack
+
+Commentaire : Profil très intéressant avec de solides compétences en développement web. Excellente maîtrise de Java, Spring Boot et des technologies front-end. Candidate motivée actuellement en Master 1 DSC, recherche un stage de 3 à 5 mois suivi d'une alternance à partir de mai 2025.
+
+Vous trouverez ci-dessous les informations complètes au format JSON :
+
+```json
+{
+    "idCandidature": "CAND2025001",
+    "nom": "Cherifi",
+    "prenom": "Sarah",
+    "mail": "cherifisarah232@gmail.com",
+    "telephone": "0750541678",
+    "diplomes": [
+        {
+            "nomDiplome": "Master 1 Données et Systèmes Connectés",
+            "anneeObtention": "2025",
+            "domaine": "Informatique"
+        },
+        {
+            "nomDiplome": "Licence Informatique",
+            "anneeObtention": "2024",
+            "domaine": "Informatique"
+        },
+        {
+            "nomDiplome": "Baccalauréat Techniques Mathématiques",
+            "anneeObtention": "2019",
+            "domaine": "Génie Mécanique"
+        }
+    ],
+    "experiences": [
+        {
+            "nomEntreprise": "Jeannette",
+            "dureeExperience": "1 an",
+            "dateDebut": "2023-06-01"
+        },
+        {
+            "nomEntreprise": "Buffalo Grill",
+            "dureeExperience": "8 mois",
+            "dateDebut": "2022-10-01"
+        },
+        {
+            "nomEntreprise": "Le Time",
+            "dureeExperience": "4 mois",
+            "dateDebut": "2022-05-01"
+        }
+    ],
+    "posteVise": "Développement Web Full-Stack",
+    "dateDisponibilite": "2025-05-01",
+    "competences": [
+        "HTML5",
+        "CSS3",
+        "JavaScript",
+        "PHP",
+        "Java",
+        "Spring Boot",
+        "MySQL",
+        "Python",
+        "C",
+        "Git",
+        "OpenGL"
+    ],
+    "softSkills": [
+        "Esprit entrepreneurial",
+        "Autonomie et initiative",
+        "Rigueur et sens du détail",
+        "Communication",
+        "Travail d'équipe",
+        "Créativité et curiosité"
+    ],
+    "permisDeConduite": ["B"],
+    "langues": ["Français", "Anglais", "Arabe"],
+    "dateCandidature": "2025-10-20",
+    "fichiers": {
+        "cv_filename": "cv_sarah_cherifi.pdf",
+        "lm_filename": "lm_sarah_cherifi.pdf"
+    },
+    "Message_Candidat_Entreprise": {
+        "AutorisationStocker": "O",
+        "AutorisationDiffuser": "O",
+        "PosteVise": "Stage développement web suivi d'alternance"
+    }
+}
+```
+
+Cordialement,
+Le service RH
+
+--------------------------------------------------------------------------------
+INSTRUCTIONS :
+--------------------------------------------------------------------------------
+1. Copier l'objet et le corps complet (Bonjour -> Le service RH)
+2. Envoyer à projetddsgroupe2@gmail.com
+3. Attacher le CV de Sarah (cv_sarah_cherifi.pdf) - optionnel
+4. Sur l'application : http://localhost:8080/admin/email-scrutator
+5. Cliquer "Traiter les Emails Non Lus"
+6. Vérifier que CAND2025001 est créée
+
+--------------------------------------------------------------------------------
+JSON SEUL (pour copier-coller) :
+--------------------------------------------------------------------------------
+
+{
+    "idCandidature": "CAND2025001",
+    "nom": "Cherifi",
+    "prenom": "Sarah",
+    "mail": "cherifisarah232@gmail.com",
+    "telephone": "0750541678",
+    "diplomes": [
+        {
+            "nomDiplome": "Master 1 Données et Systèmes Connectés",
+            "anneeObtention": "2025",
+            "domaine": "Informatique"
+        },
+        {
+            "nomDiplome": "Licence Informatique",
+            "anneeObtention": "2024",
+            "domaine": "Informatique"
+        },
+        {
+            "nomDiplome": "Baccalauréat Techniques Mathématiques",
+            "anneeObtention": "2019",
+            "domaine": "Génie Mécanique"
+        }
+    ],
+    "experiences": [
+        {
+            "nomEntreprise": "Jeannette",
+            "dureeExperience": "1 an",
+            "dateDebut": "2023-06-01"
+        },
+        {
+            "nomEntreprise": "Buffalo Grill",
+            "dureeExperience": "8 mois",
+            "dateDebut": "2022-10-01"
+        },
+        {
+            "nomEntreprise": "Le Time",
+            "dureeExperience": "4 mois",
+            "dateDebut": "2022-05-01"
+        }
+    ],
+    "posteVise": "Développement Web Full-Stack",
+    "dateDisponibilite": "2025-05-01",
+    "competences": [
+        "HTML5",
+        "CSS3",
+        "JavaScript",
+        "PHP",
+        "Java",
+        "Spring Boot",
+        "MySQL",
+        "Python",
+        "C",
+        "Git",
+        "OpenGL"
+    ],
+    "softSkills": [
+        "Esprit entrepreneurial",
+        "Autonomie et initiative",
+        "Rigueur et sens du détail",
+        "Communication",
+        "Travail d'équipe",
+        "Créativité et curiosité"
+    ],
+    "permisDeConduite": ["B"],
+    "langues": ["Français", "Anglais", "Arabe"],
+    "dateCandidature": "2025-10-20",
+    "fichiers": {
+        "cv_filename": "cv_sarah_cherifi.pdf",
+        "lm_filename": "lm_sarah_cherifi.pdf"
+    },
+    "Message_Candidat_Entreprise": {
+        "AutorisationStocker": "O",
+        "AutorisationDiffuser": "O",
+        "PosteVise": "Stage développement web suivi d'alternance"
+    }
+}
+
+--------------------------------------------------------------------------------
+NOTES :
+--------------------------------------------------------------------------------
+- JSON conforme au schéma ProjetDDS.json validé
+- Champs requis présents : idCandidature, nom, prenom, mail, telephone, 
+  langues, dateCandidature, fichiers
+- Autorisations à "O" pour permettre le transfert
+- Le CV PDF de Sarah peut être attaché (optionnel)
+- Le scrutateur extraira automatiquement le JSON de l'email
+

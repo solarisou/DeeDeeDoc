@@ -1,0 +1,326 @@
+[
+    {
+        "$schema":  "https://json-schema.org/draft/2020-12/schema",
+        "$id" : "http://example.com/example.json",
+        "title" : "Transfert des donnée à une entreprise du groupe",
+        "description" : "...",
+        "type" : "object",
+        "properties" : {
+            "idCandidature" : {
+                "description" : "Identifiant unique",
+                "type" : "String"
+                },
+            "nom" : {
+                "description" : "nom du candidat",
+                "type" : "String"
+            },
+            "prenom" : {
+                "description" : "prénom du candidat",
+                "type" : "String"
+            },
+            "mail" : {
+                "description" : "adresse mail du candidat",
+                "type" : "String"
+            },
+            "telephone" : {
+                "description" : " numéro de téléphone candidat",
+                "type" : "String"
+            },
+            "diplomes" : {
+                        "description" : "diplomes du candidat",
+                        "type" : "Array",
+                        "items" : { "type" : "object" },
+                            "propriete" : {
+                                "nomDiplome" : { "description" : "nom du diplome",
+                                                "type" : "String"
+                                                },
+                                "anneeObtention" : { "description" : "année d'obtention du diplome",
+                                                    "type" : "String"
+                                                    },
+                                "domaine" : { "description" : "domaine du diplome",
+                                                    "type" : "String"
+                                                    }
+                            }
+            },
+            "experiences" : {
+                "description" : "expériences du candidat",
+                "type" : "Array",
+                "items" : { "type" : "object" },
+                    "propriete" : {
+                    "nomEntreprise" : {
+                        "description" : "nom de l'entreprise",
+                        "type" : "String"
+                    },
+                    "dureeExperience" : {
+                        "description" : "durée de l'expérience",
+                        "type" : "String"
+                    },
+                    "dateDebut" : {
+                        "description" : "date de début de l'expérience",
+                        "type" : "String"
+                    }
+                }
+            },
+            "posteVise" : {
+                "description" : "poste visé par le candidat",
+                "type" : "String"
+            },
+            "dateDisponibilite" : {
+                "description" : "date de disponibilité du candidat",
+                "type" : "String"
+            },
+            "competences" : {
+                "description" : "compétences du candidat",
+                "type" : "Array",
+                "items" : { "type" : "String" }
+            },
+            "softSkills" : {
+                "description" : "soft skills du candidat",
+                "type" : "Array",
+                "items" : { "type" : "String" }
+            },
+            "permisDeConduite": {
+                "type": "array",
+                "description":"Liste des permis de conduite du candidats et leurs catégories",
+                "items": {
+                    "type": "string",
+                    "enum" : ["A","B","AM","C","D","F"]
+                }
+            },
+            "langues" : {
+                "description" : "langues parlées par le candidat",
+                "type" : "Array",
+                "items" : {
+                    "type" : "String" ,
+                    "enum" : ["Français","Anglais","Espagnol","Allemand","Italien","Chinois","Japonais","Russe","Arabe","Portugais"],
+                    "enum" : ["A1","A2","B1","B2","C1","C2"]
+                }
+            },
+            "dateCandidature" : {
+                "description" : "date de la candidature",
+                "type" : "String"
+            },
+            "fichiers": {
+                "type": "object",
+                "properties": {
+                    "cv_filename": { "type": "string" },
+                    "lm_filename": { "type": "string" }
+                },
+                "required": ["cv_filename"]
+            },
+
+            "required" : ["idCandidature", "nom", "prenom", "mail", "telephone","langues","dateCandidature","fichiers"]
+        }
+    },
+
+    {
+        "idCandidature": "12345",
+        "nom": "Doe",
+        "prenom": "John",
+        "mail": "blabla@gmail.com",
+        "telephone": "0606060606",
+        "diplomes": [{"nomDiplome": "Master", "anneeObtention": "2020"}],
+        "experiences": [{"nomEntreprise": "Entreprise1", "dureeExperience": "2 ans"}],
+        "posteVise": "Développeur",
+        "dateDisponibilite": "2023-10-01", 
+        "competences": ["Java", "Python"],
+        "permis": "B"
+    },
+
+
+
+    {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "MessageCandidatEntreprise",
+        "description": "Message envoyé par un candidat à une entreprise",
+        "type":"object",
+        "properties": {
+            "Message_Candidat_Entreprise":{
+                "properties": {
+                    "CV": {
+                        "type": "string",
+                        "description": "Le CV du candidat en format pdf"
+                    },
+                    "lettreDeMotivation": {
+                        "type": "string",
+                        "description": "La lettre de motivation du candidat en format pdf"
+                    },
+                    "AutorisationStocker":{
+                        "type":"string",
+                        "description":"L'autorisation du candidat pour le traitement de ses données",
+                        "items":{
+                            "type":"string",
+                            "enum": ["O", "N"]
+                        }
+                    },
+                    "AutorisationDiffuser":{
+                        "type":"string",
+                        "description":"L'autorisation du candidat pour la stockage de ses données",
+                        "items":{
+                            "type":"string",
+                            "enum": ["O", "N"]
+                        }
+                    },
+                    "PosteVise":{
+                        "type":"String",
+                        "description":"Poste auxquel le candidat postule"
+                    }
+                },
+                "required": ["CV", "lettreDeMotivation", "AutorisationStocker", "AutorisationDiffuser", "ListePostes"]
+            },
+            "Reponse_renouvellemnt":{
+                "properties": {
+                    "RenouvellemntStocker":{
+                        "type":"string",
+                        "description":"Renouvellement de la demande de stockage des données",
+                        "items":{
+                            "type":"string",
+                            "enum": ["O", "N"]
+                        }
+                    },
+                    "RenouvellementDiffuser":{
+                        "type":"string",
+                        "description":"Renouvellement de la demande de diffusion des données",
+                        "items":{
+                            "type":"string",
+                            "enum": ["O", "N"]
+                        }
+                    }
+                },
+                "required": ["RenouvellemntStocker", "RenouvellementDiffuser" ]
+            }
+        }
+    },
+
+
+    {
+        "$Schema" : "https://json-schema.org/draft/2020-12/schema",
+        "title" : "Suppression de l'entreprise …",
+        "description" : "Message de suppression d'une entreprise du consortium (Entreprise à Entreprise)",
+        "type" : "object",
+        "properties" : {
+            "idEntreprise" : {
+                "type" : "string",
+                "description" : "IdEntreprise à supprimer"
+            }
+        },
+        "required" : ["idEntreprise"]
+    },
+
+    {
+        "idEntreprise": "ent123"
+    },
+
+
+
+    {
+        "$Schema" : "https://json-schema.org/draft/2020-12/schema",
+        "title" : "Ajout de l'entreprise …",
+        "description" : "Message de l'ajout d'une entreprise à tout le consortium (Entreprise à Entreprise)",
+        "type" : "object",
+        "properties" : {
+            "idEntreprise" : {
+                "type" : "string",
+                "description" : "IdEntreprise à ajouter"
+            },
+            "nomEntreprise" : {
+                "type" : "string",
+                "description" : "Nom de l'entreprise à ajouter"
+            }
+        },
+        "required" : ["idEntreprise", "nomEntreprise"]
+    },
+
+    {
+        "idEntreprise": "ent123",
+        "nomEntreprise": "Entreprise XYZ"
+    },
+
+
+    {
+        "$Schema" : "https://json-schema.org/draft/2020-12/schema",
+        "title" : "Suppression d'un candidat",
+        "description" : "Message de supression d'un candidat (Entreprise à Entreprise)",
+        "type" : "object",
+        "properties" : {
+            "idCandidature" : {
+                "type" : "string",
+                "description" : "L'id du candidat dont les informations doivent être supprimer "
+            }
+        },
+        "required" : ["idCandidature"]
+    },
+
+    {
+        "idCandidature": "cand123"
+    },
+
+
+
+    {
+        "$Schema" : "https://json-schema.org/draft/2020-12/schema",
+        "title" : "Réponse d'un candidat",
+        "description" : "Message de réponse a la demande du candidat (Entreprise à Candidat",
+        "type" : "object",
+        "properties" : {
+            "idCandidature" : {
+                "type" : "string",
+                "description" : "L'id du candidat"
+            },
+            "reponse" : {
+                "statut" : {
+                    "type" : "string",
+                    "enum" : ["O", "N","Autre"]
+                },
+                "description" : "La réponse du candidat (accepte ou refuse)"
+            },
+            "commentaire" : {
+                "type" : "string",
+                "description" : "Le commentaire a ajouter dans le mail pour par exemple ajouter des informations"
+            },
+            "intitulePoste" : {
+                "type" : "string",
+                "description" : "L'intitulé du poste visé par le candidat"
+            },
+            "dateDecision" : {
+                "type" : "string",
+                "description" : "La date de la décision du candidat"
+            },
+        "required" : ["idCandidature", "reponse","dateDecision"]
+        }
+    },
+
+    {
+        "idCandidature": "cand123",
+        "reponse": "O",
+        "commentaire": "Nous somme très interesé par votre profil.",
+        "intitulePoste": "Développeur"
+    },
+
+
+
+    {
+        "$Schema" : "https://json-schema.org/draft/2020-12/schema",
+        "title" : "Renouvellement de l'accord de partage d'information au consortium",
+        "description" : "Message de renouvellement de l'accord de partage d'information au consortium (Entreprise à Candidat)",
+        "type" : "object",
+        "properties" : {
+            "idCandidature" : {
+                "type" : "string",
+                "description" : "idCandidature"
+            },
+            "accord" : {
+                "type" : "string",
+                "enum" : ["O", "N"],
+                "description" : "Accord de partage d'information au consortium"
+            }
+        },
+        "required" : ["idCandidature", "accord"]
+    },
+
+    {
+        "idCandidature": "cand123",
+        "accord": "O"
+    }
+]
+
