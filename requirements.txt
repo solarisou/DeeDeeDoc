@@ -1,0 +1,20 @@
+# Dépendances Python pour les scripts de traitement de CV
+# Installation: pip install -r requirements.txt
+
+# API Groq pour l'extraction structurée de données
+groq>=0.4.0
+
+# Extraction de texte depuis PDF
+PyMuPDF>=1.23.0
+
+# Traitement d'images (nécessaire pour PyMuPDF et OCR)
+Pillow>=10.0.0
+
+# OCR (Optical Character Recognition) pour les PDF scannés
+pytesseract>=0.3.10
+
+# Note: Tesseract OCR doit être installé séparément sur le système
+# Windows: https://github.com/UB-Mannheim/tesseract/wiki
+# Linux: sudo apt-get install tesseract-ocr tesseract-ocr-fra
+# macOS: brew install tesseract tesseract-lang
+
