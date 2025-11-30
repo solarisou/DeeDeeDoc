@@ -3,7 +3,6 @@
 -- Transfert entre entreprises du groupe
 
 
--- Entreprises du groupe
 CREATE TABLE entreprises (
     id_entreprise VARCHAR(50) PRIMARY KEY,
     nom_entreprise VARCHAR(255) NOT NULL,
@@ -12,6 +11,27 @@ CREATE TABLE entreprises (
     statut ENUM('active', 'inactive') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Postes disponibles
+CREATE TABLE postes_disponibles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_entreprise VARCHAR(50) NOT NULL,
+    intitule_poste VARCHAR(255) NOT NULL,
+    description TEXT,
+    competences_requises TEXT,
+    salaire_min DECIMAL(10,2),
+    salaire_max DECIMAL(10,2),
+    type_contrat ENUM('CDI', 'CDD', 'Stage', 'Alternance', 'Freelance') DEFAULT 'CDI',
+    localisation VARCHAR(255),
+    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    date_expiration DATE,
+    statut ENUM('ouvert', 'ferme', 'pourvue') DEFAULT 'ouvert',
+    
+    FOREIGN KEY (id_entreprise) REFERENCES entreprises(id_entreprise),
+    INDEX idx_entreprise (id_entreprise),
+    INDEX idx_intitule (intitule_poste),
+    INDEX idx_statut (statut)
 );
 
 -- Candidats
@@ -28,13 +48,18 @@ CREATE TABLE candidats (
     autorisation_diffuser ENUM('O', 'N') NOT NULL DEFAULT 'N',
     date_expiration_autorisation DATE,
     statut_candidature ENUM('en_attente', 'accepte', 'refuse', 'archive') DEFAULT 'en_attente',
+    type_candidature ENUM('POSTE', 'SPONTANEE') NOT NULL DEFAULT 'SPONTANEE',
+    id_poste INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     INDEX idx_email (email),
     INDEX idx_nom_prenom (nom, prenom),
     INDEX idx_date_candidature (date_candidature),
-    INDEX idx_statut (statut_candidature)
+    INDEX idx_statut (statut_candidature),
+    INDEX idx_type_candidature (type_candidature),
+    INDEX idx_poste (id_poste),
+    CONSTRAINT fk_candidat_poste FOREIGN KEY (id_poste) REFERENCES postes_disponibles(id)
 );
 
 -- Fichiers CV et lettres de motivation
@@ -62,7 +87,7 @@ CREATE TABLE diplomes (
     annee_obtention YEAR,
     domaine VARCHAR(255),
     etablissement VARCHAR(255),
-    niveau ENUM('CAP', 'BEP', 'BAC', 'BAC+2', 'BAC+3', 'BAC+5', 'BAC+8', 'Autre'),
+    niveau ENUM('CAP', 'BEP', 'BAC', 'BAC_plus_2', 'BAC_plus_3', 'BAC_plus_5', 'BAC_plus_8', 'Autre'),
     
     FOREIGN KEY (id_candidature) REFERENCES candidats(id_candidature) ON DELETE CASCADE,
     INDEX idx_candidature (id_candidature),
@@ -192,27 +217,6 @@ CREATE TABLE renouvellements_autorisation (
     FOREIGN KEY (id_candidature) REFERENCES candidats(id_candidature) ON DELETE CASCADE,
     INDEX idx_candidature (id_candidature),
     INDEX idx_date_demande (date_demande)
-);
-
--- Postes disponibles
-CREATE TABLE postes_disponibles (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    id_entreprise VARCHAR(50) NOT NULL,
-    intitule_poste VARCHAR(255) NOT NULL,
-    description TEXT,
-    competences_requises TEXT,
-    salaire_min DECIMAL(10,2),
-    salaire_max DECIMAL(10,2),
-    type_contrat ENUM('CDI', 'CDD', 'Stage', 'Alternance', 'Freelance') DEFAULT 'CDI',
-    localisation VARCHAR(255),
-    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    date_expiration DATE,
-    statut ENUM('ouvert', 'ferme', 'pourvue') DEFAULT 'ouvert',
-    
-    FOREIGN KEY (id_entreprise) REFERENCES entreprises(id_entreprise),
-    INDEX idx_entreprise (id_entreprise),
-    INDEX idx_intitule (intitule_poste),
-    INDEX idx_statut (statut)
 );
 
 -- Matching candidat-poste
