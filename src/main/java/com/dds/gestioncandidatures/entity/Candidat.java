@@ -11,6 +11,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -62,6 +64,14 @@ public class Candidat {
     
     @Column(name = "date_expiration_autorisation")
     private LocalDate dateExpirationAutorisation;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type_candidature", nullable = false)
+    private TypeCandidature typeCandidature = TypeCandidature.SPONTANEE;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_poste")
+    private Poste poste;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "statut_candidature")
@@ -82,6 +92,11 @@ public class Candidat {
     
     public enum StatutCandidature {
         en_attente, accepte, refuse, archive
+    }
+
+    public enum TypeCandidature {
+        POSTE,
+        SPONTANEE
     }
     
     // Constructeurs
@@ -129,6 +144,27 @@ public class Candidat {
     
     public LocalDate getDateExpirationAutorisation() { return dateExpirationAutorisation; }
     public void setDateExpirationAutorisation(LocalDate dateExpirationAutorisation) { this.dateExpirationAutorisation = dateExpirationAutorisation; }
+
+    public TypeCandidature getTypeCandidature() { return typeCandidature; }
+    public void setTypeCandidature(TypeCandidature typeCandidature) {
+        this.typeCandidature = typeCandidature;
+        if (typeCandidature == TypeCandidature.SPONTANEE) {
+            this.poste = null;
+        }
+    }
+
+    public Poste getPoste() { return poste; }
+    public void setPoste(Poste poste) {
+        this.poste = poste;
+        if (poste != null) {
+            this.typeCandidature = TypeCandidature.POSTE;
+            if (this.posteVise == null || this.posteVise.isBlank()) {
+                this.posteVise = poste.getIntitulePoste();
+            }
+        } else {
+            this.typeCandidature = TypeCandidature.SPONTANEE;
+        }
+    }
     
     public StatutCandidature getStatutCandidature() { return statutCandidature; }
     public void setStatutCandidature(StatutCandidature statutCandidature) { this.statutCandidature = statutCandidature; }
@@ -158,5 +194,12 @@ public class Candidat {
     
     public String getNomComplet() {
         return prenom + " " + nom;
+    }
+
+    public String getIntitulePoste() {
+        if (poste != null) {
+            return poste.getIntitulePoste();
+        }
+        return posteVise;
     }
 }

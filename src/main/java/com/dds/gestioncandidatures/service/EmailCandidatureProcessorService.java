@@ -19,10 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dds.gestioncandidatures.dto.CandidatureEmailDTO;
-import com.dds.gestioncandidatures.entity.Candidat;
-import com.dds.gestioncandidatures.entity.FichierCandidat;
-import com.dds.gestioncandidatures.repository.CandidatRepository;
-import com.dds.gestioncandidatures.repository.FichierCandidatRepository;
+import com.dds.gestioncandidatures.entity.*;
+import com.dds.gestioncandidatures.repository.*;
 import com.dds.gestioncandidatures.service.EmailReaderService.AttachmentInfo;
 import com.dds.gestioncandidatures.service.EmailReaderService.EmailContent;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,6 +39,27 @@ public class EmailCandidatureProcessorService {
     
     @Autowired
     private FichierCandidatRepository fichierCandidatRepository;
+    
+    @Autowired
+    private DiplomeRepository diplomeRepository;
+    
+    @Autowired
+    private ExperienceRepository experienceRepository;
+    
+    @Autowired
+    private LangueRepository langueRepository;
+    
+    @Autowired
+    private CompetenceRepository competenceRepository;
+    
+    @Autowired
+    private SoftSkillRepository softSkillRepository;
+    
+    @Autowired
+    private PermisConduireRepository permisConduireRepository;
+    
+    @Autowired
+    private PosteRepository posteRepository;
     
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -79,10 +98,18 @@ public class EmailCandidatureProcessorService {
                         
                         candidatRepository.save(candidat);
                         
+                        // Sauvegarder toutes les données liées
+                        saveDiplomes(candidatureDTO, candidat);
+                        saveExperiences(candidatureDTO, candidat);
+                        saveLangues(candidatureDTO, candidat);
+                        saveCompetences(candidatureDTO, candidat);
+                        saveSoftSkills(candidatureDTO, candidat);
+                        savePermis(candidatureDTO, candidat);
+                        
                         saveAttachments(email, candidat);
                         
                         result.addSuccess(candidat.getIdCandidature());
-                        logger.info("Candidature {} traitée avec succès", candidat.getIdCandidature());
+                        logger.info("Candidature {} traitée avec succès (avec toutes les données liées)", candidat.getIdCandidature());
                         
                     } else {
                         logger.warn("Aucun JSON trouvé dans l'email : {}", email.getSubject());
@@ -129,6 +156,7 @@ public class EmailCandidatureProcessorService {
         candidat.setEmail(dto.getMail() != null ? dto.getMail() : extractEmailFromSender(email.getFrom()));
         candidat.setTelephone(dto.getTelephone());
         candidat.setPosteVise(dto.getPosteVise());
+        candidat.setTypeCandidature(Candidat.TypeCandidature.SPONTANEE);
         
         if (dto.getDateDisponibilite() != null) {
             candidat.setDateDisponibilite(parseDate(dto.getDateDisponibilite()));
@@ -157,6 +185,13 @@ public class EmailCandidatureProcessorService {
                 candidat.setPosteVise(dto.getMessageCandidatEntreprise().getPosteVise());
             }
         }
+
+        if (candidat.getPosteVise() != null && !candidat.getPosteVise().isBlank()) {
+            posteRepository.findFirstByIntitulePosteIgnoreCaseAndStatut(
+                    candidat.getPosteVise(),
+                    Poste.Statut.ouvert)
+                .ifPresent(candidat::setPoste);
+        }
         
         candidat.setStatutCandidature(Candidat.StatutCandidature.en_attente);
         
@@ -164,7 +199,19 @@ public class EmailCandidatureProcessorService {
     }
     
     private LocalDate parseDate(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            return LocalDate.now();
+        }
+        
         try {
+            // Gérer le format "YYYY-MM" (année-mois)
+            if (dateStr.matches("\\d{4}-\\d{2}")) {
+                String[] parts = dateStr.split("-");
+                int year = Integer.parseInt(parts[0]);
+                int month = Integer.parseInt(parts[1]);
+                return LocalDate.of(year, month, 1); // Premier jour du mois
+            }
+            
             DateTimeFormatter[] formatters = {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd"),
                 DateTimeFormatter.ofPattern("dd/MM/yyyy"),
@@ -259,6 +306,209 @@ public class EmailCandidatureProcessorService {
                 
             } catch (IOException e) {
                 logger.error("Erreur lors de la sauvegarde du fichier : {}", attachment.getFileName(), e);
+            }
+        }
+    }
+    
+    private void saveDiplomes(CandidatureEmailDTO dto, Candidat candidat) {
+        if (dto.getDiplomes() == null || dto.getDiplomes().isEmpty()) {
+            return;
+        }
+        
+        for (CandidatureEmailDTO.Diplome diplomeDTO : dto.getDiplomes()) {
+            try {
+                Diplome diplome = new Diplome();
+                diplome.setIdCandidature(candidat.getIdCandidature());
+                diplome.setNomDiplome(diplomeDTO.getNomDiplome());
+                
+                if (diplomeDTO.getAnneeObtention() != null && !diplomeDTO.getAnneeObtention().isEmpty()) {
+                    try {
+                        diplome.setAnneeObtention(Integer.parseInt(diplomeDTO.getAnneeObtention()));
+                    } catch (NumberFormatException e) {
+                        logger.warn("Année diplôme invalide : {}", diplomeDTO.getAnneeObtention());
+                    }
+                }
+                
+                diplome.setDomaine(diplomeDTO.getDomaine());
+                
+                // Déterminer le niveau à partir du nom du diplôme
+                String nomDiplome = diplomeDTO.getNomDiplome().toUpperCase();
+                if (nomDiplome.contains("MASTER") || nomDiplome.contains("BAC+5")) {
+                    diplome.setNiveau(Diplome.Niveau.BAC_plus_5);
+                } else if (nomDiplome.contains("LICENCE") || nomDiplome.contains("BAC+3")) {
+                    diplome.setNiveau(Diplome.Niveau.BAC_plus_3);
+                } else if (nomDiplome.contains("BAC+2") || nomDiplome.contains("BTS") || nomDiplome.contains("DUT")) {
+                    diplome.setNiveau(Diplome.Niveau.BAC_plus_2);
+                } else if (nomDiplome.contains("BAC") || nomDiplome.contains("BACCALAUREAT")) {
+                    diplome.setNiveau(Diplome.Niveau.BAC);
+                } else {
+                    diplome.setNiveau(Diplome.Niveau.Autre);
+                }
+                
+                diplomeRepository.save(diplome);
+                logger.debug("Diplôme sauvegardé : {}", diplome.getNomDiplome());
+            } catch (Exception e) {
+                logger.error("Erreur lors de la sauvegarde du diplôme : {}", diplomeDTO.getNomDiplome(), e);
+            }
+        }
+    }
+    
+    private void saveExperiences(CandidatureEmailDTO dto, Candidat candidat) {
+        if (dto.getExperiences() == null || dto.getExperiences().isEmpty()) {
+            return;
+        }
+        
+        for (CandidatureEmailDTO.Experience expDTO : dto.getExperiences()) {
+            try {
+                Experience experience = new Experience();
+                experience.setIdCandidature(candidat.getIdCandidature());
+                experience.setNomEntreprise(expDTO.getNomEntreprise());
+                experience.setDureeExperience(expDTO.getDureeExperience());
+                
+                if (expDTO.getDateDebut() != null && !expDTO.getDateDebut().isEmpty()) {
+                    experience.setDateDebut(parseDate(expDTO.getDateDebut()));
+                }
+                
+                experienceRepository.save(experience);
+                logger.debug("Expérience sauvegardée : {}", experience.getNomEntreprise());
+            } catch (Exception e) {
+                logger.error("Erreur lors de la sauvegarde de l'expérience : {}", expDTO.getNomEntreprise(), e);
+            }
+        }
+    }
+    
+    private void saveLangues(CandidatureEmailDTO dto, Candidat candidat) {
+        if (dto.getLangues() == null || dto.getLangues().isEmpty()) {
+            return;
+        }
+        
+        for (String langueStr : dto.getLangues()) {
+            try {
+                Langue langue = new Langue();
+                langue.setIdCandidature(candidat.getIdCandidature());
+                
+                // Parser le format "Langue-Niveau" ou juste "Langue"
+                String langueNom;
+                String niveau = "B1"; // Par défaut B1 si non spécifié
+                
+                if (langueStr.contains("-")) {
+                    // Format "Langue-Niveau"
+                    String[] parts = langueStr.split("-", 2);
+                    langueNom = parts[0].trim();
+                    niveau = parts[1].trim();
+                } else {
+                    // Format simple "Langue"
+                    langueNom = langueStr.trim();
+                    // Pour Français, niveau C2 par défaut, sinon B2
+                    if (langueNom.equalsIgnoreCase("Français")) {
+                        niveau = "C2";
+                    } else {
+                        niveau = "B2";
+                    }
+                }
+                
+                // Mapper le nom de la langue
+                try {
+                    langue.setLangue(Langue.LangueType.valueOf(langueNom));
+                } catch (IllegalArgumentException e) {
+                    // Si la langue n'est pas dans l'enum, utiliser Français par défaut
+                    logger.warn("Langue non reconnue : {}, utilisation de Français", langueNom);
+                    langue.setLangue(Langue.LangueType.Français);
+                }
+                
+                // Mapper le niveau
+                try {
+                    langue.setNiveau(Langue.Niveau.valueOf(niveau));
+                } catch (IllegalArgumentException e) {
+                    // Si le niveau n'est pas valide, utiliser B1 par défaut
+                    logger.warn("Niveau non reconnu : {}, utilisation de B1", niveau);
+                    langue.setNiveau(Langue.Niveau.B1);
+                }
+                
+                langueRepository.save(langue);
+                logger.debug("Langue sauvegardée : {} ({})", langue.getLangue(), langue.getNiveau());
+            } catch (Exception e) {
+                logger.error("Erreur lors de la sauvegarde de la langue : {}", langueStr, e);
+            }
+        }
+    }
+    
+    private void saveCompetences(CandidatureEmailDTO dto, Candidat candidat) {
+        if (dto.getCompetences() == null || dto.getCompetences().isEmpty()) {
+            return;
+        }
+        
+        for (String competenceStr : dto.getCompetences()) {
+            try {
+                Competence competence = new Competence();
+                competence.setIdCandidature(candidat.getIdCandidature());
+                competence.setCompetence(competenceStr);
+                competence.setNiveau(Competence.Niveau.Intermédiaire); // Par défaut
+                
+                // Déterminer la catégorie selon le nom
+                String comp = competenceStr.toUpperCase();
+                if (comp.contains("SPRING") || comp.contains("REACT") || comp.contains("ANGULAR")) {
+                    competence.setCategorie(Competence.Categorie.Framework);
+                } else if (comp.contains("JAVA") || comp.contains("PYTHON") || comp.contains("JAVASCRIPT") || 
+                           comp.contains("C++") || comp.contains("C#")) {
+                    competence.setCategorie(Competence.Categorie.Langage_programmation);
+                } else if (comp.contains("GIT") || comp.contains("DOCKER") || comp.contains("MYSQL") || 
+                           comp.contains("POSTGRESQL")) {
+                    competence.setCategorie(Competence.Categorie.Logiciel);
+                } else {
+                    competence.setCategorie(Competence.Categorie.Technique);
+                }
+                
+                competenceRepository.save(competence);
+                logger.debug("Compétence sauvegardée : {}", competence.getCompetence());
+            } catch (Exception e) {
+                logger.error("Erreur lors de la sauvegarde de la compétence : {}", competenceStr, e);
+            }
+        }
+    }
+    
+    private void saveSoftSkills(CandidatureEmailDTO dto, Candidat candidat) {
+        if (dto.getSoftSkills() == null || dto.getSoftSkills().isEmpty()) {
+            return;
+        }
+        
+        for (String softSkillStr : dto.getSoftSkills()) {
+            try {
+                SoftSkill softSkill = new SoftSkill();
+                softSkill.setIdCandidature(candidat.getIdCandidature());
+                softSkill.setSoftSkill(softSkillStr);
+                softSkill.setNiveau(SoftSkill.Niveau.Bon); // Par défaut
+                
+                softSkillRepository.save(softSkill);
+                logger.debug("Soft skill sauvegardé : {}", softSkill.getSoftSkill());
+            } catch (Exception e) {
+                logger.error("Erreur lors de la sauvegarde du soft skill : {}", softSkillStr, e);
+            }
+        }
+    }
+    
+    private void savePermis(CandidatureEmailDTO dto, Candidat candidat) {
+        if (dto.getPermisDeConduite() == null || dto.getPermisDeConduite().isEmpty()) {
+            return;
+        }
+        
+        for (String permisStr : dto.getPermisDeConduite()) {
+            try {
+                PermisConduire permis = new PermisConduire();
+                permis.setIdCandidature(candidat.getIdCandidature());
+                
+                // Mapper le permis
+                try {
+                    permis.setCategoriePermis(PermisConduire.CategoriePermis.valueOf(permisStr.trim()));
+                } catch (IllegalArgumentException e) {
+                    logger.warn("Permis non reconnu : {}, utilisation de B par défaut", permisStr);
+                    permis.setCategoriePermis(PermisConduire.CategoriePermis.B);
+                }
+                
+                permisConduireRepository.save(permis);
+                logger.debug("Permis sauvegardé : {}", permis.getCategoriePermis());
+            } catch (Exception e) {
+                logger.error("Erreur lors de la sauvegarde du permis : {}", permisStr, e);
             }
         }
     }

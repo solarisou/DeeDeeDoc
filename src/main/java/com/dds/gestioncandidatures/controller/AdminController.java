@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.dds.gestioncandidatures.service.CandidatIdGeneratorService;
+import com.dds.gestioncandidatures.service.DebugService;
 
 @Controller
 @RequestMapping("/admin")
@@ -29,6 +30,9 @@ public class AdminController {
     
     @Autowired
     private CandidatIdGeneratorService candidatIdGeneratorService;
+    
+    @Autowired
+    private DebugService debugService;
     
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -85,6 +89,9 @@ public class AdminController {
             model.addAttribute("nbLogs", nbLogs);
             model.addAttribute("nbFichiersUploads", nbFichiersUploads);
             model.addAttribute("tablesExistent", true);
+            
+            // État du mode debug
+            model.addAttribute("debugMode", debugService.isDebugMode());
             
         } catch (Exception e) {
             // Les tables n'existent pas ou autre erreur
@@ -463,19 +470,23 @@ public class AdminController {
         return "redirect:/admin/database";
     }
     
-    private String extractDatabaseName(String url) {
-        // Format: jdbc:mysql://localhost:3306/gestion_candidatures
-        int lastSlash = url.lastIndexOf('/');
-        if (lastSlash != -1 && lastSlash < url.length() - 1) {
-            String dbPart = url.substring(lastSlash + 1);
-            // Enlever les paramètres éventuels après ?
-            int questionMark = dbPart.indexOf('?');
-            if (questionMark != -1) {
-                return dbPart.substring(0, questionMark);
+    @PostMapping("/toggle-debug")
+    public String toggleDebugMode(@RequestParam("enabled") boolean enabled, 
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            debugService.setDebugMode(enabled);
+            if (enabled) {
+                redirectAttributes.addFlashAttribute("success", 
+                    "Mode debug activé ! Les fichiers de traitement seront sauvegardés dans uploads/debug/");
+            } else {
+                redirectAttributes.addFlashAttribute("success", "Mode debug désactivé.");
             }
-            return dbPart;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", 
+                "Erreur lors de la modification du mode debug : " + e.getMessage());
         }
-        return "gestion_candidatures"; // Valeur par défaut
+        
+        return "redirect:/admin/database";
     }
     
     private int executerFichierSQL(String sqlContent) {

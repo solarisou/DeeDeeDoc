@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Postes disponibles</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Gestion Candidatures</a>
+            <div class="navbar-nav">
+                <a class="nav-link active" href="/candidat/postes">Postes disponibles</a>
+                <a class="nav-link" href="/candidat/deposer">Déposer un CV</a>
+                <a class="nav-link" href="/employe/dashboard">Espace employé</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="mb-0">Postes ouverts aux candidatures</h2>
+                <p class="text-muted">Consultez les opportunités disponibles et candidatez en un clic.</p>
+            </div>
+            <a href="/candidat/deposer" class="btn btn-primary">Déposer une candidature spontanée</a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(postes)}" class="alert alert-info">
+            Aucun poste n'est actuellement ouvert. N'hésitez pas à déposer une candidature spontanée ou à revenir plus tard.
+        </div>
+
+        <div class="row g-4" th:if="${!#lists.isEmpty(postes)}">
+            <div class="col-md-6" th:each="poste : ${postes}">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0" th:text="${poste.intitulePoste}"></h5>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <p class="text-muted mb-2">
+                            <strong>Entreprise :</strong>
+                            <span th:text="${poste.entreprise.nomEntreprise}"></span>
+                        </p>
+                        <p class="text-muted mb-2">
+                            <strong>Contrat :</strong>
+                            <span th:text="${poste.typeContrat}"></span>
+                            <span th:if="${poste.localisation != null}">
+                                • <strong>Localisation :</strong>
+                                <span th:text="${poste.localisation}"></span>
+                            </span>
+                        </p>
+                        <p class="text-muted mb-3" th:if="${poste.dateCreation != null}">
+                            <strong>Publié le :</strong> <span th:text="${#temporals.format(poste.dateCreation, 'dd/MM/yyyy')}"></span>
+                        </p>
+                        <div th:if="${poste.description != null}">
+                            <h6 class="fw-semibold text-decoration-underline">Description</h6>
+                            <p th:text="${poste.description}"></p>
+                        </div>
+                        <div th:if="${poste.competencesRequises != null}">
+                            <h6 class="fw-semibold text-decoration-underline">Compétences clés</h6>
+                            <p th:text="${poste.competencesRequises}"></p>
+                        </div>
+                        <div class="mt-auto">
+                            <a class="btn btn-success w-100"
+                               th:href="@{'/candidat/deposer'(type='POSTE', posteId=${poste.id})}">
+                                Candidater sur ce poste
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

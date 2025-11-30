@@ -1,0 +1,194 @@
+/* ============================================
+   CHARTE DE COULEURS UNIFORME
+   ============================================ */
+:root {
+    --color-primary: #2563EB;        /* Bleu principal */
+    --color-primary-dark: #1E40AF;    /* Bleu foncé */
+    --color-gray: #64748B;            /* Gris neutre */
+    --color-gray-light: #f8f9fa;      /* Gris clair */
+    --color-white: #FFFFFF;
+    --color-success: #10B981;         /* Vert pour validations */
+    --color-danger: #dc3545;          /* Rouge pour erreurs */
+}
+
+/* ============================================
+   NAVBAR
+   ============================================ */
+.navbar {
+    background-color: var(--color-primary-dark) !important;
+}
+
+.navbar-brand,
+.nav-link {
+    color: var(--color-white) !important;
+}
+
+.nav-link:hover {
+    color: var(--color-gray-light) !important;
+}
+
+.nav-link.active {
+    color: var(--color-white) !important;
+    font-weight: bold;
+}
+
+/* ============================================
+   CARDS - Headers uniformes
+   ============================================ */
+.card-header {
+    background-color: var(--color-primary) !important;
+    color: var(--color-white) !important;
+    border: none;
+}
+
+.card {
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================
+   BOUTONS
+   ============================================ */
+.btn-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+}
+
+.btn-success {
+    background-color: var(--color-success);
+    border-color: var(--color-success);
+}
+
+.btn-secondary {
+    background-color: var(--color-gray);
+    border-color: var(--color-gray);
+    color: var(--color-white);
+}
+
+.btn-secondary:hover {
+    background-color: #475569;
+    border-color: #475569;
+    color: var(--color-white);
+}
+
+/* ============================================
+   BADGES
+   ============================================ */
+.badge.bg-primary,
+.badge.bg-primary {
+    background-color: var(--color-primary) !important;
+}
+
+.badge.bg-secondary {
+    background-color: var(--color-gray) !important;
+}
+
+.badge.bg-success {
+    background-color: var(--color-success) !important;
+}
+
+.badge.bg-danger {
+    background-color: var(--color-danger) !important;
+}
+
+.badge.bg-warning {
+    background-color: #f59e0b !important;
+    color: #000 !important;
+}
+
+/* ============================================
+   ALERTS
+   ============================================ */
+.alert-success {
+    background-color: #d1fae5;
+    border-color: var(--color-success);
+    color: #065f46;
+}
+
+.alert-danger {
+    background-color: #fee2e2;
+    border-color: var(--color-danger);
+    color: #991b1b;
+}
+
+.alert-warning {
+    background-color: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+}
+
+.alert-info {
+    background-color: #dbeafe;
+    border-color: var(--color-primary);
+    color: #1e40af;
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+.table thead th {
+    background-color: var(--color-gray-light);
+    color: var(--color-primary-dark);
+    font-weight: 600;
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: var(--color-gray-light);
+}
+
+/* ============================================
+   ELEMENTS SPECIFIQUES
+   ============================================ */
+.info-card {
+    margin-bottom: 20px;
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--color-primary-dark);
+}
+
+.section-title {
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    color: var(--color-primary-dark);
+}
+
+.list-item {
+    padding: 8px;
+    border-left: 3px solid var(--color-primary);
+    margin-bottom: 8px;
+    background: var(--color-gray-light);
+}
+
+/* ============================================
+   OVERRIDES POUR UNIFORMISER
+   ============================================ */
+.bg-primary {
+    background-color: var(--color-primary) !important;
+}
+
+.bg-secondary {
+    background-color: var(--color-gray) !important;
+}
+
+.text-primary {
+    color: var(--color-primary) !important;
+}
+
+.text-secondary {
+    color: var(--color-gray) !important;
+}
+
+.border-primary {
+    border-color: var(--color-primary) !important;
+}
+
+

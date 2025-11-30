@@ -19,4 +19,6 @@ public interface CandidatRepository extends JpaRepository<Candidat, String> {
     List<Candidat> findByPosteViseContaining(String poste);
     
     List<Candidat> findByOrderByDateCandidatureDesc();
+
+    List<Candidat> findByPosteId(Long posteId);
 }

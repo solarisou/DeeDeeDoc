@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Détail candidature</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="/">Gestion Candidatures</a>
             <div class="navbar-nav">
@@ -23,32 +24,57 @@
             <a href="/employe/candidatures" class="btn btn-secondary">Retour à la liste</a>
         </div>
         
+        <!-- Messages flash -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert">
+            <span th:text="${warning}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
         <div class="row">
+            <!-- Colonne principale -->
             <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Informations du candidat</h5>
+                <!-- Informations de base -->
+                <div class="card info-card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Informations personnelles</h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <p><strong>ID:</strong> <span th:text="${candidat.idCandidature}"></span></p>
-                                <p><strong>Nom:</strong> <span th:text="${candidat.nom}"></span></p>
-                                <p><strong>Prénom:</strong> <span th:text="${candidat.prenom}"></span></p>
-                                <p><strong>Email:</strong> <span th:text="${candidat.email}"></span></p>
-                                <p><strong>Téléphone:</strong> <span th:text="${candidat.telephone}"></span></p>
+                                <p><span class="info-label">ID:</span> <span th:text="${candidat.idCandidature}"></span></p>
+                                <p><span class="info-label">Nom:</span> <span th:text="${candidat.nom}"></span></p>
+                                <p><span class="info-label">Prénom:</span> <span th:text="${candidat.prenom}"></span></p>
+                                <p><span class="info-label">Email:</span> <a th:href="'mailto:' + ${candidat.email}" th:text="${candidat.email}"></a></p>
+                                <p><span class="info-label">Téléphone:</span> <span th:text="${candidat.telephone}"></span></p>
                             </div>
                             <div class="col-md-6">
-                                <p><strong>Poste visé:</strong> <span th:text="${candidat.posteVise ?: 'Non spécifié'}"></span></p>
-                                <p><strong>Date candidature:</strong> <span th:text="${#temporals.format(candidat.dateCandidature, 'dd/MM/yyyy')}"></span></p>
-                                <p><strong>Date disponibilité:</strong> 
+                                <p><span class="info-label">Type de candidature:</span>
+                                    <span class="badge"
+                                          th:classappend="${candidat.typeCandidature.name() == 'SPONTANEE'} ? 'bg-secondary' : 'bg-primary'">
+                                        <span th:text="${candidat.typeCandidature.name() == 'POSTE' ?
+                                           'Candidature sur un poste' : 'Candidature spontanée'}"></span>
+                                    </span>
+                                </p>
+                                <p><span class="info-label">Poste ciblé:</span>
+                                    <span th:text="${candidat.intitulePoste != null ? candidat.intitulePoste : 'Non spécifié'}"></span>
+                                </p>
+                                <p><span class="info-label">Date candidature:</span> <span th:text="${#temporals.format(candidat.dateCandidature, 'dd/MM/yyyy')}"></span></p>
+                                <p><span class="info-label">Date disponibilité:</span> 
                                    <span th:text="${candidat.dateDisponibilite != null ? #temporals.format(candidat.dateDisponibilite, 'dd/MM/yyyy') : 'Non spécifiée'}"></span>
                                 </p>
-                                <p><strong>Autorisation stockage:</strong> 
+                                <p><span class="info-label">Autorisation stockage:</span> 
                                    <span class="badge" th:classappend="${candidat.autorisationStocker.name() == 'O'} ? 'bg-success' : 'bg-danger'"
                                          th:text="${candidat.autorisationStocker.name() == 'O'} ? 'Oui' : 'Non'"></span>
                                 </p>
-                                <p><strong>Autorisation diffusion:</strong> 
+                                <p><span class="info-label">Autorisation diffusion:</span> 
                                    <span class="badge" th:classappend="${candidat.autorisationDiffuser.name() == 'O'} ? 'bg-success' : 'bg-danger'"
                                          th:text="${candidat.autorisationDiffuser.name() == 'O'} ? 'Oui' : 'Non'"></span>
                                 </p>
@@ -57,39 +83,147 @@
                     </div>
                 </div>
                 
-                <!-- Fichiers -->
-                <div class="card mt-4" th:if="${candidat.fichiers != null and !#lists.isEmpty(candidat.fichiers)}">
-                    <div class="card-header">
-                        <h5>Fichiers</h5>
+                <!-- Diplômes -->
+                <div class="card info-card" th:if="${candidatEnrichi.diplomes != null and !#lists.isEmpty(candidatEnrichi.diplomes)}">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Diplômes et Formations (<span th:text="${candidatEnrichi.nbDiplomes}"></span>)</h5>
                     </div>
                     <div class="card-body">
-                        <div th:each="fichier : ${candidat.fichiers}">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <p><strong>CV:</strong> <span th:text="${fichier.cvFilename}"></span></p>
-                                    <p><strong>Taille:</strong> <span th:text="${fichier.cvSizeBytes != null ? (fichier.cvSizeBytes / 1024) + ' KB' : 'N/A'}"></span></p>
-                                </div>
-                                <div class="col-md-6" th:if="${fichier.lmFilename != null}">
-                                    <p><strong>Lettre de motivation:</strong> <span th:text="${fichier.lmFilename}"></span></p>
-                                    <p><strong>Taille:</strong> <span th:text="${fichier.lmSizeBytes != null ? (fichier.lmSizeBytes / 1024) + ' KB' : 'N/A'}"></span></p>
+                        <div th:each="diplome : ${candidatEnrichi.diplomes}" class="list-item">
+                            <h6 class="mb-1" th:text="${diplome.nomDiplome}"></h6>
+                            <small class="text-muted">
+                                <span th:if="${diplome.niveau != null}" th:text="${diplome.niveau}"></span>
+                                <span th:if="${diplome.domaine != null}"> - <span th:text="${diplome.domaine}"></span></span>
+                                <span th:if="${diplome.anneeObtention != null}"> - <span th:text="${diplome.anneeObtention}"></span></span>
+                                <span th:if="${diplome.etablissement != null}"> - <span th:text="${diplome.etablissement}"></span></span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Expériences professionnelles -->
+                <div class="card info-card" th:if="${candidatEnrichi.experiences != null and !#lists.isEmpty(candidatEnrichi.experiences)}">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Expériences professionnelles (<span th:text="${candidatEnrichi.nbExperiences}"></span>)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:each="exp : ${candidatEnrichi.experiences}" class="list-item">
+                            <h6 class="mb-1">
+                                <span th:if="${exp.poste != null}" th:text="${exp.poste} + ' - '"></span>
+                                <span th:text="${exp.nomEntreprise}"></span>
+                            </h6>
+                            <small class="text-muted">
+                                <span th:if="${exp.dureeExperience != null}">Durée: <span th:text="${exp.dureeExperience}"></span></span>
+                                <span th:if="${exp.dateDebut != null}"> - Début: <span th:text="${#temporals.format(exp.dateDebut, 'MM/yyyy')}"></span></span>
+                                <span th:if="${exp.dateFin != null}"> - Fin: <span th:text="${#temporals.format(exp.dateFin, 'MM/yyyy')}"></span></span>
+                            </small>
+                            <p th:if="${exp.description != null}" class="mt-2 mb-0" th:text="${exp.description}"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Compétences techniques -->
+                <div class="card info-card" th:if="${candidatEnrichi.competences != null and !#lists.isEmpty(candidatEnrichi.competences)}">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Compétences techniques (<span th:text="${candidatEnrichi.nbCompetences}"></span>)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4" th:each="comp : ${candidatEnrichi.competences}">
+                                <span class="badge bg-secondary mb-2" th:text="${comp.competence}"></span>
+                                <small th:if="${comp.niveau != null}" class="text-muted" th:text="' (' + ${comp.niveau} + ')'"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Soft Skills -->
+                <div class="card info-card" th:if="${candidatEnrichi.softSkills != null and !#lists.isEmpty(candidatEnrichi.softSkills)}">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Compétences comportementales (<span th:text="${candidatEnrichi.nbSoftSkills}"></span>)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6" th:each="skill : ${candidatEnrichi.softSkills}">
+                                <div class="mb-2">
+                                    <span th:text="${skill.softSkill}"></span>
+                                    <small th:if="${skill.niveau != null}" class="text-muted" th:text="' - ' + ${skill.niveau}"></small>
                                 </div>
                             </div>
-                            <p><strong>Date upload:</strong> <span th:text="${#temporals.format(fichier.dateUpload, 'dd/MM/yyyy HH:mm')}"></span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Langues -->
+                <div class="card info-card" th:if="${candidatEnrichi.langues != null and !#lists.isEmpty(candidatEnrichi.langues)}">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Langues (<span th:text="${candidatEnrichi.nbLangues}"></span>)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6" th:each="langue : ${candidatEnrichi.langues}">
+                                <p class="mb-2">
+                                    <strong th:text="${langue.langue}"></strong> - 
+                                    <span class="badge bg-secondary" th:text="${langue.niveau}"></span>
+                                    <span th:if="${langue.certification != null}" class="text-muted"> (<span th:text="${langue.certification}"></span>)</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Permis de conduire -->
+                <div class="card info-card" th:if="${candidatEnrichi.permis != null and !#lists.isEmpty(candidatEnrichi.permis)}">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Permis de conduire</h5>
+                    </div>
+                    <div class="card-body">
+                        <span th:each="permis : ${candidatEnrichi.permis}" class="badge bg-secondary me-2" th:text="'Permis ' + ${permis.categoriePermis}"></span>
+                    </div>
+                </div>
+                
+                <!-- Fichiers -->
+                <div class="card info-card" th:if="${candidatEnrichi.fichiers != null and !#lists.isEmpty(candidatEnrichi.fichiers)}">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Fichiers</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:each="fichier : ${candidatEnrichi.fichiers}">
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <p class="mb-2"><strong>CV:</strong> <span th:text="${fichier.cvFilename}"></span></p>
+                                    <a th:href="@{/fichiers/view/{filename}(filename=${fichier.cvFilename})}" 
+                                       class="btn btn-sm btn-primary me-2" target="_blank">Voir le CV</a>
+                                    <a th:href="@{/fichiers/download/{filename}(filename=${fichier.cvFilename})}" 
+                                       class="btn btn-sm btn-success">Télécharger le CV</a>
+                                </div>
+                                <div class="col-md-12 mt-2" th:if="${fichier.lmFilename != null}">
+                                    <p class="mb-2"><strong>Lettre de motivation:</strong> <span th:text="${fichier.lmFilename}"></span></p>
+                                    <a th:href="@{/fichiers/view/{filename}(filename=${fichier.lmFilename})}" 
+                                       class="btn btn-sm btn-primary me-2" target="_blank">Voir la LM</a>
+                                    <a th:href="@{/fichiers/download/{filename}(filename=${fichier.lmFilename})}" 
+                                       class="btn btn-sm btn-success">Télécharger la LM</a>
+                                </div>
+                            </div>
+                            <small class="text-muted">Uploadé le <span th:text="${#temporals.format(fichier.dateUpload, 'dd/MM/yyyy à HH:mm')}"></span></small>
                         </div>
                     </div>
                 </div>
             </div>
             
+            <!-- Colonne latérale -->
             <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Gestion du statut</h5>
+                <!-- Gestion du statut -->
+                <div class="card info-card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Gestion du statut</h5>
                     </div>
                     <div class="card-body">
                         <p><strong>Statut actuel:</strong></p>
                         <span class="badge fs-6" 
                               th:classappend="${candidat.statutCandidature.name() == 'en_attente'} ? 'bg-warning' : 
-                                             (${candidat.statutCandidature.name() == 'accepte'} ? 'bg-success' : 'bg-danger')"
+                                             (${candidat.statutCandidature.name() == 'accepte'} ? 'bg-success' : 
+                                             (${candidat.statutCandidature.name() == 'refuse'} ? 'bg-danger' : 'bg-secondary'))"
                               th:text="${candidat.statutCandidature}"></span>
                         
                         <form th:action="@{/employe/candidature/{id}/statut(id=${candidat.idCandidature})}" 
@@ -100,18 +234,34 @@
                                     <option value="en_attente" th:selected="${candidat.statutCandidature.name() == 'en_attente'}">En attente</option>
                                     <option value="accepte" th:selected="${candidat.statutCandidature.name() == 'accepte'}">Accepté</option>
                                     <option value="refuse" th:selected="${candidat.statutCandidature.name() == 'refuse'}">Refusé</option>
-                                    <option value="archive" th:selected="${candidat.statutCandidature.name() == 'archive'}">Archivé</option>
                                 </select>
                             </div>
-                            <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                            <button type="submit" class="btn btn-primary w-100">Mettre à jour</button>
                         </form>
                     </div>
                 </div>
                 
+                <!-- Résumé rapide -->
+                <div class="card info-card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Résumé rapide</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li><strong>Diplômes:</strong> <span th:text="${candidatEnrichi.nbDiplomes}"></span></li>
+                            <li><strong>Expériences:</strong> <span th:text="${candidatEnrichi.nbExperiences}"></span></li>
+                            <li><strong>Langues:</strong> <span th:text="${candidatEnrichi.nbLangues}"></span></li>
+                            <li><strong>Compétences:</strong> <span th:text="${candidatEnrichi.nbCompetences}"></span></li>
+                            <li><strong>Soft skills:</strong> <span th:text="${candidatEnrichi.nbSoftSkills}"></span></li>
+                            <li><strong>Fichiers:</strong> <span th:text="${candidatEnrichi.nbFichiers}"></span></li>
+                        </ul>
+                    </div>
+                </div>
+                
                 <!-- Transfert vers autre entreprise -->
-                <div class="card mt-4" th:if="${candidat.autorisationDiffuser.name() == 'O'}">
-                    <div class="card-header bg-info text-white">
-                        <h5>Transférer la candidature</h5>
+                <div class="card info-card" th:if="${candidat.autorisationDiffuser.name() == 'O'}">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Transférer la candidature</h5>
                     </div>
                     <div class="card-body">
                         <p class="text-muted">Envoyer cette candidature à une autre entreprise du groupe</p>
@@ -120,7 +270,7 @@
                             <div class="mb-3">
                                 <label for="entrepriseDestination" class="form-label">Entreprise destination:</label>
                                 <select name="entrepriseDestination" id="entrepriseDestination" class="form-select" required>
-                                    <option value="">-- Sélectionner une entreprise --</option>
+                                    <option value="">-- Sélectionner --</option>
                                     <option th:each="entreprise : ${entreprises}" 
                                             th:value="${entreprise.idEntreprise}"
                                             th:text="${entreprise.nomEntreprise + ' (' + entreprise.emailEntreprise + ')'}">
@@ -128,16 +278,16 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="commentaire" class="form-label">Commentaire (optionnel):</label>
+                                <label for="commentaire" class="form-label">Commentaire:</label>
                                 <textarea name="commentaire" id="commentaire" class="form-control" rows="3" 
                                           placeholder="Message accompagnant le transfert..."></textarea>
                             </div>
-                            <button type="submit" class="btn btn-info w-100">Envoyer par email</button>
+                            <button type="submit" class="btn btn-primary w-100">Envoyer par email</button>
                         </form>
                     </div>
                 </div>
                 
-                <div class="alert alert-warning mt-4" th:if="${candidat.autorisationDiffuser.name() == 'N'}">
+                <div class="alert alert-warning" th:if="${candidat.autorisationDiffuser.name() == 'N'}">
                     <strong>Transfert impossible:</strong> Le candidat n'a pas autorisé la diffusion de ses données.
                 </div>
             </div>
