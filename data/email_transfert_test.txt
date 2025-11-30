@@ -28,7 +28,7 @@ Vous trouverez ci-dessous les informations complètes au format JSON :
 
 ```json
 {
-    "idCandidature": "CAND2025001",
+    "idCandidature": "00020002",
     "nom": "Cherifi",
     "prenom": "Sarah",
     "mail": "cherifisarah232@gmail.com",
@@ -123,7 +123,7 @@ JSON SEUL (pour copier-coller) :
 --------------------------------------------------------------------------------
 
 {
-    "idCandidature": "CAND2025001",
+    "idCandidature": "00020002,
     "nom": "Cherifi",
     "prenom": "Sarah",
     "mail": "cherifisarah232@gmail.com",
