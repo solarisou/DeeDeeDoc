@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Déposer un CV</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="/">Gestion Candidatures</a>
             <div class="navbar-nav">
-                <a class="nav-link" href="/candidat/deposer">Déposer un CV</a>
+                <a class="nav-link" href="/candidat/postes">Voir les postes</a>
+                <a class="nav-link active" href="/candidat/deposer">Déposer un CV</a>
                 <a class="nav-link" href="/employe/dashboard">Espace employé</a>
             </div>
         </div>
@@ -35,20 +37,8 @@
                         
                         <form th:action="@{/candidat/deposer}" method="post" enctype="multipart/form-data">
                             
-                            <!-- Entreprise fixée à ENTGROUP2 (0002) -->
-                            <input type="hidden" name="entrepriseId" value="0002">
-                            
-                            <div class="mb-4 d-none">
-                                <label for="entrepriseId" class="form-label">
-                                    <strong>Entreprise *</strong>
-                                </label>
-                                <select class="form-select" name="entrepriseId" id="entrepriseId" disabled>
-                                    <option value="0002" selected>ENTGROUP2</option>
-                                </select>
-                                <div class="form-text">
-                                    Candidature pour : ENTGROUP2
-                                </div>
-                            </div>
+                            <input type="hidden" name="entrepriseId" id="entrepriseIdHidden"
+                                   th:value="${entrepriseParDefaut}">
                             
                             <div class="mb-4">
                                 <label for="cvFile" class="form-label">
@@ -58,6 +48,49 @@
                                        accept=".pdf" required>
                                 <div class="form-text">
                                     Formats acceptés : PDF uniquement. Taille max : 10MB
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label"><strong>Type de candidature *</strong></label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="typeCandidature" id="typePoste"
+                                           value="POSTE"
+                                           th:checked="${typeCandidatureDefaut == 'POSTE'}">
+                                    <label class="form-check-label" for="typePoste">
+                                        Je postule sur un poste publié
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="typeCandidature" id="typeSpontanee"
+                                           value="SPONTANEE"
+                                           th:checked="${typeCandidatureDefaut == null || typeCandidatureDefaut == 'SPONTANEE'}">
+                                    <label class="form-check-label" for="typeSpontanee">
+                                        Candidature spontanée
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-4" id="blocPostes"
+                                 th:style="${typeCandidatureDefaut == 'POSTE'} ? '' : 'display:none;'">
+                                <label for="posteId" class="form-label">
+                                    <strong>Sélectionnez un poste</strong>
+                                </label>
+                                <div th:if="${#lists.isEmpty(postes)}" class="alert alert-info">
+                                    Aucun poste n'est actuellement disponible. Votre candidature sera traitée comme une candidature spontanée.
+                                </div>
+                                <select class="form-select" name="posteId" id="posteId"
+                                        th:attr="disabled=${#lists.isEmpty(postes)} ? 'disabled' : null">
+                                    <option value="">-- Choisir un poste --</option>
+                                    <option th:each="poste : ${postes}"
+                                            th:value="${poste.id}"
+                                            th:data-entreprise="${poste.entreprise.idEntreprise}"
+                                            th:selected="${posteSelectionne != null and posteSelectionne == poste.id}"
+                                            th:text="${poste.intitulePoste}">
+                                    </option>
+                                </select>
+                                <div class="form-text">
+                                    Les postes listés sont ceux encore ouverts aux candidatures.
                                 </div>
                             </div>
                             
@@ -70,9 +103,11 @@
                             
                             <div class="row mb-4">
                                 <div class="col-md-6">
-                                    <div class="card border-primary">
+                                    <div class="card">
+                                        <div class="card-header bg-primary text-white">
+                                            <h6 class="card-title mb-0">Autorisation de stockage *</h6>
+                                        </div>
                                         <div class="card-body">
-                                            <h6 class="card-title">Autorisation de stockage *</h6>
                                             <p class="card-text small">
                                                 Acceptez-vous que nous stockions vos données personnelles ?
                                             </p>
@@ -90,9 +125,11 @@
                                 </div>
                                 
                                 <div class="col-md-6">
-                                    <div class="card border-info">
+                                    <div class="card">
+                                        <div class="card-header bg-primary text-white">
+                                            <h6 class="card-title mb-0">Autorisation de diffusion</h6>
+                                        </div>
                                         <div class="card-body">
-                                            <h6 class="card-title">Autorisation de diffusion</h6>
                                             <p class="card-text small">
                                                 Acceptez-vous que nous partagions votre profil avec d'autres entreprises du groupe ?
                                             </p>
@@ -124,6 +161,57 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            const typePoste = document.getElementById('typePoste');
+            const typeSpontanee = document.getElementById('typeSpontanee');
+            const blocPostes = document.getElementById('blocPostes');
+            const posteSelect = document.getElementById('posteId');
+            const entrepriseHidden = document.getElementById('entrepriseIdHidden');
+            const defaultEntrepriseId = entrepriseHidden ? entrepriseHidden.value : '';
+
+            function toggleBlocPostes() {
+                const afficherBloc = typePoste && typePoste.checked;
+                blocPostes.style.display = afficherBloc ? '' : 'none';
+                if (posteSelect) {
+                    if (afficherBloc) {
+                        posteSelect.removeAttribute('disabled');
+                        posteSelect.setAttribute('required', 'required');
+                    } else {
+                        posteSelect.setAttribute('disabled', 'disabled');
+                        posteSelect.removeAttribute('required');
+                        posteSelect.value = '';
+                        if (entrepriseHidden) {
+                            entrepriseHidden.value = defaultEntrepriseId;
+                        }
+                    }
+                }
+            }
+
+            function updateEntrepriseFromPoste() {
+                if (!posteSelect || !entrepriseHidden) {
+                    return;
+                }
+                const option = posteSelect.options[posteSelect.selectedIndex];
+                if (option && option.dataset.entreprise) {
+                    entrepriseHidden.value = option.dataset.entreprise;
+                }
+            }
+
+            if (typePoste && typeSpontanee && blocPostes) {
+                typePoste.addEventListener('change', toggleBlocPostes);
+                typeSpontanee.addEventListener('change', toggleBlocPostes);
+                toggleBlocPostes();
+            }
+
+            if (posteSelect) {
+                posteSelect.addEventListener('change', updateEntrepriseFromPoste);
+                if (!posteSelect.hasAttribute('disabled') && posteSelect.value) {
+                    updateEntrepriseFromPoste();
+                }
+            }
+        })();
+    </script>
 </body>
 </html>
 
